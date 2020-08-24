@@ -4,12 +4,26 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
 
-public class JVorbisStreamer implements Runnable {
-    private volatile boolean isShuttingDown = false;
+public class JVorbisStreamer implements Runnable, VolumeControl {
+    private boolean isShuttingDown = false;
     private final byte[] buffer = new byte[4096];
+    private boolean volChange = false;
+    private float gainChange = -5f;
 
     public void shutdown() {
         isShuttingDown = true;
+    }
+
+    @Override
+    public void incVolume() {
+        gainChange += 0.1f;
+        volChange = true;
+    }
+
+    @Override
+    public void decVolume() {
+        gainChange += 0.1f;
+        volChange = true;
     }
 
     synchronized private void playSong(Thread thread) throws LineUnavailableException, IOException, UnsupportedAudioFileException {
@@ -32,12 +46,16 @@ public class JVorbisStreamer implements Runnable {
         if (line != null) {
             line.open();
 
+            // Get Volume Control and set current gain
+            FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+            gainControl.setValue(gainChange);
+
             line.start();
 
             // Process audio buffer length bytes at a time
             int nBytesRead = 0;
             while (nBytesRead != -1) {
-                if(isShuttingDown) {
+                if (isShuttingDown) {
                     line.flush();
                     line.stop();
                     line.close();
@@ -48,6 +66,10 @@ public class JVorbisStreamer implements Runnable {
                 nBytesRead = dataIn.read(buffer, 0, buffer.length);
                 if (nBytesRead != -1) {
                     line.write(buffer, 0, nBytesRead);
+                }
+                if (volChange) {
+                    gainControl.setValue(gainChange);
+                    volChange = false;
                 }
             }
 

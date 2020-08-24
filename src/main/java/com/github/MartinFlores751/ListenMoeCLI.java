@@ -37,7 +37,7 @@ public class ListenMoeCLI {
             Thread musicThread = new Thread(japMusic);
 
             // Key input and create thread for input
-            UserInput input = new UserInput(terminal);
+            UserInput input = new UserInput(terminal, japMusic);
             Thread inputThread = new Thread(input);
 
             // Start threads to handle input and music
