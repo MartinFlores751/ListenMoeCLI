@@ -16,13 +16,13 @@ public class JVorbisStreamer implements Runnable, VolumeControl {
 
     @Override
     public void incVolume() {
-        gainChange += 0.1f;
+        gainChange += 1f;
         volChange = true;
     }
 
     @Override
     public void decVolume() {
-        gainChange += 0.1f;
+        gainChange -= 1f;
         volChange = true;
     }
 
