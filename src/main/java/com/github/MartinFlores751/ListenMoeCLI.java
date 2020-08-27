@@ -34,11 +34,11 @@ public class ListenMoeCLI {
             terminal.flush();
 
             // Create Jpop Music Streamer and create thread for music
-            JVorbisStreamer japMusic = new JVorbisStreamer();
-            Thread musicThread = new Thread(japMusic);
+            JVorbisStreamer jMusic = new JVorbisStreamer();
+            Thread musicThread = new Thread(jMusic);
 
             // Key input and create thread for input
-            UserInput input = new UserInput(terminal, japMusic);
+            UserInput input = new UserInput(terminal);
             Thread inputThread = new Thread(input);
 
             // Create Websocket
@@ -68,7 +68,7 @@ public class ListenMoeCLI {
             }
             // Close all streams
             client.close();
-            japMusic.shutdown();
+            jMusic.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

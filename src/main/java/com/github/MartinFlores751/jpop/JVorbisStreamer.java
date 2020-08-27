@@ -1,6 +1,9 @@
 package com.github.MartinFlores751.jpop;
 
 import com.github.MartinFlores751.VolumeControl;
+import com.github.MartinFlores751.events.VolumeChangeEvent;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
@@ -14,6 +17,15 @@ public class JVorbisStreamer implements Runnable, VolumeControl {
 
     public void shutdown() {
         isShuttingDown = true;
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    public void onMessageEvent(VolumeChangeEvent e) {
+        if (e.isVolumeUp())
+            incVolume();
+        else
+            decVolume();
     }
 
     @Override
@@ -87,6 +99,7 @@ public class JVorbisStreamer implements Runnable, VolumeControl {
 
     @Override
     public void run() {
+        EventBus.getDefault().register(this);
         try {
             while (!isShuttingDown) {
                 playSong(Thread.currentThread());
