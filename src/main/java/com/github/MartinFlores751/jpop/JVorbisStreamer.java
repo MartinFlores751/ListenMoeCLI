@@ -1,5 +1,7 @@
 package com.github.MartinFlores751.jpop;
 
+import com.github.MartinFlores751.VolumeControl;
+
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;

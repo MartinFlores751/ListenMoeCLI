@@ -1,6 +1,5 @@
 package com.github.MartinFlores751;
 
-import com.github.MartinFlores751.jpop.VolumeControl;
 import com.googlecode.lanterna.input.InputProvider;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;

@@ -1,4 +1,4 @@
-package com.github.MartinFlores751.jpop;
+package com.github.MartinFlores751;
 
 public interface VolumeControl {
     public void incVolume();
