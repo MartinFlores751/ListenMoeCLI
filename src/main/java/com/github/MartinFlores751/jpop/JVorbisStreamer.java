@@ -13,7 +13,7 @@ public class JVorbisStreamer implements Runnable, VolumeControl {
     private boolean isShuttingDown = false;
     private final byte[] buffer = new byte[4096];
     private boolean volChange = false;
-    private float gainChange = -5f;
+    private float gainChange = -15f;
 
     public void shutdown() {
         isShuttingDown = true;
