@@ -1,10 +1,13 @@
 package com.github.MartinFlores751;
 
+import com.github.MartinFlores751.jpop.JMoeClient;
 import com.github.MartinFlores751.jpop.JVorbisStreamer;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class ListenMoeCLI {
     public static void main(String[] args) {
@@ -15,8 +18,6 @@ public class ListenMoeCLI {
         Terminal terminal = null;
 
         try {
-            // Perform all terminal actions here
-
             // Create terminal
             terminal = terminalFactory.createTerminal();
 
@@ -40,6 +41,21 @@ public class ListenMoeCLI {
             UserInput input = new UserInput(terminal, japMusic);
             Thread inputThread = new Thread(input);
 
+            // Create Websocket
+            JMoeClient client = null;
+            try {
+                client = new JMoeClient(new URI("wss://listen.moe/gateway_v2"));
+            } catch(URISyntaxException e) {
+                e.printStackTrace();
+            }
+
+            // Close program if client is bad
+            if (client == null)
+                System.exit(-1);
+
+            // Async connect websocket
+            client.connect();
+
             // Start threads to handle input and music
             inputThread.start();
             musicThread.start();
@@ -50,6 +66,8 @@ public class ListenMoeCLI {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            // Close all streams
+            client.close();
             japMusic.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
