@@ -10,40 +10,51 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.StringReader;
 import java.net.URI;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class JMoeClient extends WebSocketClient {
-    private final Logger logger;
-    private int heartBeat;
+    private final Logger logger = LoggerFactory.getLogger(JMoeClient.class);
+    private final Timer heartbeatTimer = new Timer();
+
+    private class HeartbeatTask extends TimerTask {
+        @Override
+        public void run() {
+            JsonObject json = Json.createObjectBuilder()
+                    .add("op", 9)
+                    .build();
+            send(json.toString());
+        }
+    }
 
     public JMoeClient(URI serverUri) {
         super(serverUri);
-        logger = LoggerFactory.getLogger(JMoeClient.class);
-        logger.info("Hello World!");
     }
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        logger.info(handshakedata.toString());
     }
 
     @Override
     public void onMessage(String message) {
-        logger.info(message);
+        logger.debug(message);
         JsonObject obj = Json.createReader(new StringReader(message)).readObject();
         switch(obj.getInt("op")) {
-            case 0: heartBeat = obj.getJsonObject("d").getInt("heartbeat");
+            case 0: int heartbeat = obj.getJsonObject("d").getInt("heartbeat");
+                heartbeatTimer.scheduleAtFixedRate(new HeartbeatTask(), heartbeat, heartbeat);
                 break;
-            case 1:
+            case 10: logger.debug("Good heartbeat");
+                break;
         }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        logger.info(reason);
+        heartbeatTimer.cancel();
     }
 
     @Override
     public void onError(Exception ex) {
-        logger.info(ex.toString());
+        logger.error(ex.toString());
     }
 }
