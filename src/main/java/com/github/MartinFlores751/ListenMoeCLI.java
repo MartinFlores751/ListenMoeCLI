@@ -44,7 +44,7 @@ public class ListenMoeCLI {
             JMoeClient client = null;
             try {
                 client = new JMoeClient(new URI("wss://listen.moe/gateway_v2"));
-            } catch(URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
 
