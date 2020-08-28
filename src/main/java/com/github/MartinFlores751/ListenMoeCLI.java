@@ -14,7 +14,6 @@ public class ListenMoeCLI {
         // Create terminal factory, to choose most appropriate Terminal for the current use case
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
 
-        // Set terminal to null to there are no complaints on the 'finally' section
         Terminal terminal = null;
 
         try {
@@ -53,6 +52,8 @@ public class ListenMoeCLI {
             if (client == null)
                 System.exit(-1);
 
+            GUI userGui = new GUI(terminal);
+
             // Async connect websocket
             client.connect();
 
@@ -69,6 +70,7 @@ public class ListenMoeCLI {
             // Close all streams
             client.close();
             jMusic.shutdown();
+            userGui.unsubscribe();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

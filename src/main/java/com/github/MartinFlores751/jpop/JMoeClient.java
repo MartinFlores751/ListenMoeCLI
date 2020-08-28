@@ -1,5 +1,7 @@
 package com.github.MartinFlores751.jpop;
 
+import com.github.MartinFlores751.events.CurrentSongEvent;
+import org.greenrobot.eventbus.EventBus;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -43,6 +45,8 @@ public class JMoeClient extends WebSocketClient {
             case 0: int heartbeat = obj.getJsonObject("d").getInt("heartbeat");
                 heartbeatTimer.scheduleAtFixedRate(new HeartbeatTask(), heartbeat, heartbeat);
                 break;
+            case 1:
+                EventBus.getDefault().post( new CurrentSongEvent(obj.getJsonObject("d").getJsonObject("song")));
             case 10: logger.debug("Good heartbeat");
                 break;
         }
