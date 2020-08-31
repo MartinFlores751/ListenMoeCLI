@@ -67,7 +67,7 @@ public class ListenMoeCLI {
 
             // Close the music stream and remove userGUI from subscriptions
             jMusic.shutdown();
-            userGui.unsubscribe();
+            userGui.stop();
         } catch (IOException e) {
             logger.error("Failed to open terminal!", e);
         }

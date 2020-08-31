@@ -48,8 +48,8 @@ public class GUI {
         // Create label for song
         songLabel = new Label("Loading song...");
         songLabel.setLayoutData(GridLayout.createLayoutData(
-                GridLayout.Alignment.CENTER,
-                GridLayout.Alignment.CENTER,
+                GridLayout.Alignment.BEGINNING,
+                GridLayout.Alignment.BEGINNING,
                 false,
                 false,
                 3,
@@ -72,7 +72,8 @@ public class GUI {
         EventBus.getDefault().register(this);
     }
 
-    public void unsubscribe() {
+    public void stop() {
+        ((AsynchronousTextGUIThread) textGUI.getGUIThread()).stop();
         EventBus.getDefault().unregister(this);
     }
 
