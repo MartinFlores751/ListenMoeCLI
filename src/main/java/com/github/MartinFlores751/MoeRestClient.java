@@ -41,7 +41,6 @@ public class MoeRestClient {
      *
      * @param userName User's username for ListenMoe
      * @param password User's password for ListenMoe
-     * @return Boolean showing if user was able to login
      * @throws IOException From creating connection to server endpoint
      */
     public static void loginUser(String userName, String password) throws IOException {
@@ -78,27 +77,27 @@ public class MoeRestClient {
         // Log response message
         logger.debug(responseJson.getString("message"));
 
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            // Determine if 2FA is needed!
-            boolean twoFactorAuthNeeded = responseJson.getBoolean("mfa", false);
-            if (twoFactorAuthNeeded) {
-                // Get 2FA input
-            } else {
-                // Get auth token
-                authToken = responseJson.getString("token");
-            }
-        }
-        // Invalid Body
-        else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
-
-        }
-        // Bad Pass
-        else if (responseCode == HttpsURLConnection.HTTP_UNAUTHORIZED) {
-
-        }
-        // Deactivated Account
-        else if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN) {
-
+        switch (responseCode) {
+            case HttpsURLConnection.HTTP_OK:
+                // Determine if 2FA is needed!
+                boolean twoFactorAuthNeeded = responseJson.getBoolean("mfa", false);
+                if (twoFactorAuthNeeded) {
+                    // Get 2FA input
+                } else {
+                    // Get auth token
+                    authToken = responseJson.getString("token");
+                }
+                break;
+            case HttpsURLConnection.HTTP_BAD_REQUEST:
+                // Invalid Body
+                logger.warn("Bad password!");
+                break;
+            case HttpsURLConnection.HTTP_UNAUTHORIZED:
+                // Bad Password
+                break;
+            case HttpsURLConnection.HTTP_FORBIDDEN:
+                // Deactivated Account
+                break;
         }
     }
 }
