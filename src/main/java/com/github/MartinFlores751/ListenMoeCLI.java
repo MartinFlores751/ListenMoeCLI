@@ -16,60 +16,58 @@ import java.net.URISyntaxException;
 public class ListenMoeCLI {
     private static final Logger logger = LoggerFactory.getLogger(ListenMoeCLI.class);
 
-    public static void main(String[] args) {
-        // Create terminal factory, to choose most appropriate Terminal for the current use case
+    /**
+     * Runs and manages all high level logic of ListenMoeCLI
+     *
+     * @param args Command line arguments. Currently ignored.
+     * @throws IOException if terminal could not be created
+     * @throws URISyntaxException if URL is invalid. Only possible if programmer made error.
+     */
+    public static void main(String[] args) throws IOException, URISyntaxException {
+        // Create terminal
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
+        Terminal terminal = terminalFactory.createTerminal();
+        Screen screen = new TerminalScreen(terminal);
 
-        try (
-                Terminal terminal = terminalFactory.createTerminal();
-                Screen screen = new TerminalScreen(terminal);
-        ) {
-            // Ensure the screen can be used
-            screen.startScreen();
+        // Ensure the screen can be used
+        screen.startScreen();
 
-            // Create Jpop Music Streamer and create thread for music
-            JVorbisStreamer jMusic = new JVorbisStreamer();
-            Thread musicThread = new Thread(jMusic);
+        // Create Jpop Music Streamer and create thread for music
+        JVorbisStreamer jMusic = new JVorbisStreamer();
+        Thread musicThread = new Thread(jMusic);
 
-            // Key input and create thread for input
-            UserInput input = new UserInput(terminal);
-            Thread inputThread = new Thread(input);
+        // Key input and create thread for input
+        UserInput input = new UserInput(terminal);
+        Thread inputThread = new Thread(input);
 
-            // Create Websocket
-            JMoeClient client = null;
-            try {
-                client = new JMoeClient(new URI("wss://listen.moe/gateway_v2"));
-            } catch (URISyntaxException e) {
-                logger.warn("Failed to connect to WebSocket!", e);
-            }
+        // Create Websocket
+        JMoeClient client = new JMoeClient(new URI("wss://listen.moe/gateway_v2"));
 
-            // Create GUI manager
-            GUI userGui = new GUI(terminal, screen);
+        // Create GUI manager
+        GUI userGui = new GUI(terminal, screen);
 
-            // Async connect websocket
-            if (client != null)
-                client.connect();
+        // Async connect websocket
+        client.connect();
 
-            // Start threads to handle input and music
-            inputThread.start();
-            musicThread.start();
+        // Start threads to handle input and music
+        inputThread.start();
+        musicThread.start();
 
-            // Await for input to signal exit and kill music streamer thereafter
-            try {
-                inputThread.join();
-            } catch (InterruptedException e) {
-                logger.warn("Interrupted while waiting for program end!", e);
-            }
-
-            // Close WebSocket if open
-            if (client != null)
-                client.stop();
-
-            // Close the music stream and remove userGUI from subscriptions
-            jMusic.shutdown();
-            userGui.stop();
-        } catch (IOException e) {
-            logger.error("Failed to open terminal!", e);
+        // Await for input to signal exit and kill music streamer thereafter
+        try {
+            inputThread.join();
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted while waiting for program end!", e);
         }
+
+        // Close WebSocket if open
+        client.stop();
+
+        // Close the music stream and remove userGUI from subscriptions
+        jMusic.shutdown();
+        userGui.stop();
+
+        // Close the terminal
+        terminal.close();
     }
 }
